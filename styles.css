@@ -17,7 +17,7 @@
 
   --ink:      #DED9F0;  /* primary text */
   --ink-soft: #A9A2CC;  /* muted */
-  --ink-faint:#847DA6;  /* captions */
+  --ink-faint:#948EB6;  /* captions — AA on panel/code/void */
 
   /* the signature: electric iris */
   --iris:      #7C6BF5;
@@ -39,14 +39,14 @@
   --tok-str:  #9E8CFB;
   --tok-num:  #4FD69A;
   --tok-bool: #F0B15C;
-  --tok-null: #847DA6;
+  --tok-null: #948EB6;
   --tok-mono: #CFC9EC;
 
   /* text/placeholder that always sit on the dark --code-bg surface
      (inputs, selects) — stays light in both themes because the code
      surface stays dark in both themes. */
   --on-code:        #DED9F0;
-  --on-code-faint:  #847DA6;
+  --on-code-faint:  #948EB6;
   --iris-on-code:   #9A8CF9;
 
   --danger: #F0796B;
@@ -87,8 +87,8 @@
 
     --get:   #147A4E;   --get-wash:  #E4F5EC;  --get-line:  #BFE7D2;
     --post:  #965E12;   --post-wash: #FBEEDA;  --post-line: #F0D6A6;
-    --put:   #1F6FB8;   --put-wash:  #E2F0FB;  --put-line:  #BEDCF2;
-    --del2:  #C33B2C;   --del-wash:  #FBE7E4;  --del-line:  #F1CBC5;
+    --put:   #1A6299;   --put-wash:  #E2F0FB;  --put-line:  #BEDCF2;
+    --del2:  #B83324;   --del-wash:  #FBE7E4;  --del-line:  #F1CBC5;
     --ok:    #147A4E;
 
     --danger: #C33B2C;
