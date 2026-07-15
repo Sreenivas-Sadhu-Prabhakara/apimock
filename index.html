@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'">
+  <title>apimock — build a mock API from one example JSON response</title>
+  <meta name="description" content="Paste one example JSON response and get a working mock: inferred schema, realistic seeded variant records, a json-server db.json, a dependency-free Node server, and an OpenAPI 3.0 stub. Runs entirely in your browser.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://sreenivas-sadhu-prabhakara.github.io/apimock/">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="author" content="Sreenivas Sadhu Prabhakara">
+  <meta name="keywords" content="api mock, mock server, json-server, fake json data, schema inference, openapi generator, mock api from example, seeded fake data, offline dev tool, rest api stub">
+  <meta name="theme-color" content="#F4F2FB" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#14121F" media="(prefers-color-scheme: dark)">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="apimock">
+  <meta property="og:title" content="apimock — build a mock API from one example JSON response">
+  <meta property="og:description" content="Paste one example response. Get an inferred schema, realistic seeded variant records, a json-server db.json, a dependency-free Node server, and an OpenAPI 3.0 stub. Fully offline.">
+  <meta property="og:url" content="https://sreenivas-sadhu-prabhakara.github.io/apimock/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://sreenivas-sadhu-prabhakara.github.io/apimock/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="apimock — one example JSON response fans out into mock records and artifacts">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="apimock — build a mock API from one example JSON response">
+  <meta name="twitter:description" content="Paste one example response. Get an inferred schema, seeded variant records, a json-server db.json, a Node server, and an OpenAPI 3.0 stub. Fully offline.">
+  <meta name="twitter:image" content="https://sreenivas-sadhu-prabhakara.github.io/apimock/og-image.png">
+  <meta name="twitter:image:alt" content="apimock — one example JSON response fans out into mock records and artifacts">
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+
+  <!-- Structured data (data block; not affected by script-src) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "apimock",
+    "description": "A client-side tool that turns one example JSON response into a working mock API: it infers the schema, generates realistic seeded variant records, and emits a json-server db.json, a dependency-free Node http server, and an OpenAPI 3.0 stub. Private, offline, no accounts.",
+    "url": "https://sreenivas-sadhu-prabhakara.github.io/apimock/",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any (modern web browser)",
+    "browserRequirements": "Requires a modern web browser with JavaScript enabled.",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "license": "https://opensource.org/licenses/MIT",
+    "author": { "@type": "Person", "name": "Sreenivas Sadhu Prabhakara" },
+    "softwareVersion": "0.1.0",
+    "featureList": [
+      "Schema inference from a single example JSON response",
+      "Nested objects and arrays of objects captured with element shape",
+      "Realistic fake values from key-name heuristics (id, email, name, dates, price, url)",
+      "Seeded deterministic output — same seed reproduces byte-identical records",
+      "json-server db.json plus the exact command to run it",
+      "Dependency-free standalone Node http mock server",
+      "OpenAPI 3.0 schema stub for the shape",
+      "Runs 100% offline in your browser"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I create a mock API from a single JSON example?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Paste one example response into apimock. It infers the schema — types, nested objects, and arrays with their element shape — then generates as many realistic variant records as you ask for and hands you a json-server db.json, a dependency-free Node server, and an OpenAPI 3.0 stub you can copy or download and run immediately."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Will the generated fake data be the same every time?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, as long as the seed and the example stay the same. apimock uses a seeded pseudo-random generator (a cyrb53 hash feeding mulberry32), so a given seed reproduces byte-identical records on every run. Change the seed, or press reroll, to get a fresh but equally reproducible set."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does it decide what fake value to put in each field?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It reads the example value's type and shape first, then the key name. A value that already looks like a UUID, email, URL, or ISO date is mimicked exactly. Otherwise key-name heuristics kick in: id becomes an integer or uuid, fields ending in _at or containing date become timestamps, name/first/last become person names, price or amount become money, and is/has fields become booleans."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I run the mock server offline with no dependencies?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Alongside the json-server db.json, apimock emits a standalone server.js that uses only Node's built-in http module — no npm install needed. Save it and run node server.js to serve your mock collection and single-item routes on localhost."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is my example data sent anywhere?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. apimock runs entirely in your browser and a strict Content-Security-Policy sets connect-src to none, so the page cannot make any network request. Your example JSON and everything generated from it never leave your device."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#workbench">Skip to the console</a>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero" id="top">
+    <div class="hero__inner">
+      <a class="brand" href="#top" aria-label="apimock home">
+        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true">
+          <rect x="1" y="1" width="30" height="30" rx="9" class="brand__bg"/>
+          <path class="brand__brace" d="M13 8 q-3 0 -3 3 v2 q0 2 -2 3 q2 1 2 3 v2 q0 3 3 3"/>
+          <path class="brand__brace" d="M19 8 q3 0 3 3 v2 q0 2 2 3 q-2 1 -2 3 v2 q0 3 -3 3"/>
+          <circle cx="16" cy="16" r="1.9" class="brand__dot"/>
+        </svg>
+        <span class="brand__word">apimock</span>
+      </a>
+
+      <p class="eyebrow">One example in &middot; a working mock out &middot; fully offline</p>
+      <h1 class="hero__title">Turn one example response into a <span class="hero__accent">whole mock API.</span></h1>
+      <p class="hero__lede">
+        Paste a single JSON response. apimock reads its shape, invents believable variant records with a
+        seeded generator, and hands you ready-to-run artifacts&mdash;a json-server <code>db.json</code>,
+        a zero-dependency Node server, and an OpenAPI 3.0 stub. Nothing you paste ever leaves this device.
+      </p>
+      <div class="hero__flow" aria-hidden="true">
+        <span class="chip chip--req"><span class="badge badge--post">POST</span><code>/users</code></span>
+        <span class="flow-arrow">&rarr;</span>
+        <span class="chip chip--res"><span class="badge badge--ok">200</span><code>{&hellip;}&nbsp;&times;N</code></span>
+      </div>
+    </div>
+  </header>
+
+  <main id="workbench">
+    <div class="grid">
+      <!-- ============ LEFT: INPUT ============ -->
+      <section class="col col--input" aria-labelledby="inputHeading">
+        <form class="card card--input" id="buildForm" novalidate>
+          <div class="card__head">
+            <h2 class="card__title" id="inputHeading">Example response</h2>
+            <div class="card__head-actions">
+              <button type="button" class="btn btn--ghost btn--sm" id="loadSampleBtn">Load sample</button>
+              <button type="button" class="btn btn--ghost btn--sm" id="clearBtn">Clear</button>
+            </div>
+          </div>
+
+          <label class="sr-only" for="exampleInput">Example JSON response</label>
+          <textarea id="exampleInput" class="code-input" spellcheck="false" autocomplete="off"
+            autocapitalize="off" autocorrect="off"
+            aria-describedby="inputError"
+            placeholder='Paste one JSON response, e.g. {"users":[{"id":1,"name":"Ada"}]}'></textarea>
+          <p class="formerror" id="inputError" role="alert" aria-live="assertive"></p>
+
+          <div class="controls">
+            <div class="field field--endpoint">
+              <label class="field__label" for="pathInput">Endpoint</label>
+              <div class="endpoint">
+                <span class="select select--method">
+                  <select id="methodSelect" aria-label="HTTP method">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="PATCH">PATCH</option>
+                    <option value="DELETE">DELETE</option>
+                  </select>
+                </span>
+                <input type="text" id="pathInput" class="input input--path" value="/api/users"
+                  autocomplete="off" spellcheck="false" aria-label="Endpoint path">
+              </div>
+            </div>
+
+            <div class="controls__row">
+              <div class="field field--count">
+                <label class="field__label" for="countInput">Records</label>
+                <input type="number" id="countInput" class="input input--num" min="1" max="50" step="1" value="5"
+                  inputmode="numeric" aria-describedby="countHint">
+              </div>
+              <div class="field field--seed">
+                <label class="field__label" for="seedInput">Seed</label>
+                <div class="seedwrap">
+                  <input type="text" id="seedInput" class="input input--seed" value="endpoint-01"
+                    autocomplete="off" spellcheck="false"
+                    aria-label="Random seed (same seed reproduces the same data)">
+                  <button type="button" class="btn btn--ghost btn--icon" id="rerollBtn"
+                    aria-label="Reroll the seed for a fresh but reproducible set" title="Reroll seed">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/>
+                      <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <p class="hint" id="countHint">1&ndash;50 records. The same seed always reproduces the same data, so mocks are stable across teammates.</p>
+          </div>
+
+          <button type="submit" class="btn btn--primary btn--build" id="buildBtn">Build the mock</button>
+        </form>
+
+        <!-- Schema summary lives under input on wide screens -->
+        <section class="card card--schema" id="schemaCard" aria-labelledby="schemaHeading">
+          <div class="card__head">
+            <h2 class="card__title" id="schemaHeading">Inferred schema</h2>
+            <span class="card__hint-inline">types &amp; shape</span>
+          </div>
+          <div class="schema" id="schemaTree" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <!-- ============ RIGHT: OUTPUT ============ -->
+      <section class="col col--output" aria-labelledby="outputHeading">
+        <h2 class="sr-only" id="outputHeading">Generated mock</h2>
+
+        <p class="empty empty--big" id="emptyState" hidden>Paste an example response and press <strong>Build the mock</strong>.</p>
+
+        <div id="output">
+          <!-- endpoint meta bar -->
+          <div class="endpoint-bar" aria-label="Mock endpoint">
+            <span class="badge badge--get" id="methodBadge">GET</span>
+            <code class="route" id="routeText">/api/users</code>
+            <span class="status" id="statusBadge">200 OK</span>
+            <span class="record-meta" id="recordMeta"></span>
+          </div>
+
+          <!-- tabs -->
+          <div class="tabs" role="tablist" aria-label="Generated output">
+            <button class="tab is-active" role="tab" data-tab="records" aria-selected="true" id="tab-records" aria-controls="panel-records">Records</button>
+            <button class="tab" role="tab" data-tab="db" aria-selected="false" tabindex="-1" id="tab-db" aria-controls="panel-db">db.json</button>
+            <button class="tab" role="tab" data-tab="server" aria-selected="false" tabindex="-1" id="tab-server" aria-controls="panel-server">server.js</button>
+            <button class="tab" role="tab" data-tab="openapi" aria-selected="false" tabindex="-1" id="tab-openapi" aria-controls="panel-openapi">OpenAPI</button>
+          </div>
+
+          <!-- Records panel -->
+          <div class="panel" role="tabpanel" data-panel="records" id="panel-records" aria-labelledby="tab-records">
+            <div class="panel__bar">
+              <span class="panel__label">Generated records</span>
+              <span class="panel__actions">
+                <button type="button" class="btn btn--ghost btn--sm" data-copy="recordsPre" data-label="Records JSON">Copy</button>
+                <button type="button" class="btn btn--ghost btn--sm" data-download="records">Download</button>
+              </span>
+            </div>
+            <pre class="payload" id="recordsPre" tabindex="0"></pre>
+          </div>
+
+          <!-- db.json panel -->
+          <div class="panel" role="tabpanel" data-panel="db" id="panel-db" aria-labelledby="tab-db" hidden>
+            <div class="panel__bar">
+              <span class="panel__label">json-server database</span>
+              <span class="panel__actions">
+                <button type="button" class="btn btn--ghost btn--sm" data-copy="dbPre" data-label="db.json">Copy</button>
+                <button type="button" class="btn btn--ghost btn--sm" data-download="db">Download</button>
+              </span>
+            </div>
+            <div class="runbox">
+              <span class="runbox__label">Run it</span>
+              <pre class="runbox__cmd" id="runCmd" tabindex="0"></pre>
+              <button type="button" class="btn btn--ghost btn--sm" data-copy="runCmd" data-label="Command">Copy command</button>
+            </div>
+            <pre class="payload" id="dbPre" tabindex="0"></pre>
+          </div>
+
+          <!-- server.js panel -->
+          <div class="panel" role="tabpanel" data-panel="server" id="panel-server" aria-labelledby="tab-server" hidden>
+            <div class="panel__bar">
+              <span class="panel__label">Standalone Node server &middot; no dependencies</span>
+              <span class="panel__actions">
+                <button type="button" class="btn btn--ghost btn--sm" data-copy="serverPre" data-label="server.js">Copy</button>
+                <button type="button" class="btn btn--ghost btn--sm" data-download="server">Download</button>
+              </span>
+            </div>
+            <pre class="payload" id="serverPre" tabindex="0"></pre>
+          </div>
+
+          <!-- OpenAPI panel -->
+          <div class="panel" role="tabpanel" data-panel="openapi" id="panel-openapi" aria-labelledby="tab-openapi" hidden>
+            <div class="panel__bar">
+              <span class="panel__label">OpenAPI 3.0 stub</span>
+              <span class="panel__actions">
+                <button type="button" class="btn btn--ghost btn--sm" data-copy="openapiPre" data-label="OpenAPI stub">Copy</button>
+                <button type="button" class="btn btn--ghost btn--sm" data-download="openapi">Download</button>
+              </span>
+            </div>
+            <pre class="payload" id="openapiPre" tabindex="0"></pre>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="foot">
+    <div class="foot__inner">
+      <p class="foot__disclaimer">
+        <strong>A developer convenience for scaffolding test fixtures.</strong> apimock generates fake,
+        randomly-invented data for mocking and prototyping only&mdash;it is not real, not validated against any
+        production contract, and infers types from a single example, so review the schema before you rely on it.
+        Runs entirely in your browser&mdash;nothing you enter leaves this device.
+      </p>
+      <p class="foot__meta">
+        <span>Works 100% offline</span><span class="foot__dot">&middot;</span>
+        <span>No network, no accounts</span><span class="foot__dot">&middot;</span>
+        <span>Saved only on your device</span><span class="foot__dot">&middot;</span>
+        <span>MIT&nbsp;License</span><span class="foot__dot">&middot;</span>
+        <span>&copy; 2026 Sreenivas&nbsp;Sadhu&nbsp;Prabhakara</span>
+      </p>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
